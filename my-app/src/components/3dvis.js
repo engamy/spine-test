@@ -1,21 +1,23 @@
-import React, { useRef, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
-const ThreeDVis = () => {
+const RotatingModel = () => {
   const { scene } = useGLTF('/spine_model/scene.gltf');
-  
-  // Reference for directional light
-  const directionalLightRef = useRef();
+  const modelRef = useRef();
 
-  useEffect(() => {
-    if (directionalLightRef.current) {
-      // Make sure the directional light points to the center of the scene
-      directionalLightRef.current.target.position.set(0, 0, 0); // Pointing at the center of the scene
+  // Rotate the model slowly on the Y-axis
+  useFrame(() => {
+    if (modelRef.current) {
+      modelRef.current.rotation.y += 0.01; // Adjust the value to control the speed of rotation
     }
-  }, []);
+  });
 
+  return <primitive ref={modelRef} object={scene} scale={0.2} position={[0, -4.5, 0]} />;
+};
+
+const ThreeDVis = () => {
   return (
     <Canvas
       style={{ width: '100vw', height: '100vh' }}
@@ -28,14 +30,13 @@ const ThreeDVis = () => {
       
       {/* Directional light shining from the top */}
       <directionalLight
-        ref={directionalLightRef}
         position={[0, 10, 0]} // Positioned above the scene
         intensity={1} // Adjust intensity as needed
         castShadow // Enable shadows
       />
       
-      {/* Model */}
-      <primitive object={scene} scale={0.2} position={[0, -4.5, 0]} />
+      {/* Model with rotation */}
+      <RotatingModel />
       
       {/* Controls for rotating the scene */}
       <OrbitControls />
